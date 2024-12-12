@@ -1,5 +1,5 @@
 import axios from "axios";
-import {getCookie} from "./cookieUtil";
+import {getCookie} from "./CookieUtil.jsx";
 
 const jwtAxios = axios.create();
 

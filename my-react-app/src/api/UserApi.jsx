@@ -1,5 +1,5 @@
 import axios   from "axios";
-import {setCookie} from "../util/CookieUtil.js";
+import {setCookie} from "../util/CookieUtil.jsx";
 
 export const API_SERVER_HOST = process.env.REACT_APP_API_SERVER_HOST;
 
@@ -26,7 +26,7 @@ export const signup = async (signupParam) => {
   }
 };
 
-export const login = async (data) => {
+export const loginPost = async (data) => {
   const body = {
     username: data.username,
     password: data.password
