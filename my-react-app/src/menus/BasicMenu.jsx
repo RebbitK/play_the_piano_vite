@@ -25,7 +25,6 @@ const BasicMenu = () => {
           </li>
         </ul>
 
-        {/* 오른쪽 로그인 버튼 */}
         <div>
           <Link
               to="/auth/login"
