@@ -12,7 +12,6 @@ const BasicMenu = () => {
 
   return (
       <nav className="flex items-center justify-between bg-orange-500 px-6 py-4">
-        {/* 왼쪽 메뉴 */}
         <ul className="flex space-x-6 text-white font-bold text-lg">
           <li>
             <Link to="/">Home</Link>
