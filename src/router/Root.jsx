@@ -1,25 +1,23 @@
 import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import authRouter from "./AuthRouter.jsx";
 
 const Main = lazy(() => import("../pages/MainPage.jsx"));
-const Loading = <div>Loading....</div>; // 로딩 중 표시
+const Loading = <div>Loading....</div>;
 
-// 라우터 설정
-const router = createBrowserRouter([
+const root = createBrowserRouter([
   {
-    path: "/",
+    path: "",
     element: (
         <Suspense fallback={Loading}>
           <Main />
         </Suspense>
     ),
   },
+  {
+    path: "/auth",
+    children: authRouter()
+  },
 ]);
 
-const App = () => {
-  return (
-      <RouterProvider router={router} />
-  );
-};
-
-export default App;
+export default root;
