@@ -1,42 +1,79 @@
-import React, { useState } from 'react';
-import { signup } from '../api/UserApi.jsx';
-import {checkUsername} from "../api/UserApi.jsx";
-import {checkNickname} from "../api/UserApi.jsx";
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {checkNickname, checkUsername, signup} from '../api/UserApi.jsx';
+import {useNavigate} from 'react-router-dom';
 
 const SignupComponent = () => {
   const [username, setUsername] = useState('');
+  const [tempUsername, setTempUsername] = useState("");
+  const [isUsernameChecked, setIsUsernameChecked] = useState(false);
   const [nickname, setNickname] = useState('');
+  const [tempNickname, setTempNickname] = useState("");
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [password, setPassword] = useState('');
+  const [checkPassword, setCheckPassword] = useState('')
+  const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await signup({ username, password, nickname, consent });
+      if (!isUsernameChecked) {
+        alert("아이디 중복 확인을 먼저 해주세요.");
+        return;
+      }
+      if (!isNicknameChecked) {
+        alert("닉네임 중복 확인을 먼저 해주세요.");
+        return;
+      }
+      const response = await signup({
+        username: tempUsername,
+        password,
+        checkPassword,
+        email: "test",
+        nickname: tempNickname,
+        consent
+      });
       alert("회원가입 성공")
       navigate('/auth/login');
 
     } catch (error) {
-      console.error('Error:', error);
     }
   };
 
   const handleCheckUsername = async (e) => {
     try {
-      const response = await checkUsername({username});
-      if(response.data === true){
-        setUsername(response)
+      const response = await checkUsername({username: tempUsername});
+      if (response.data === true) {
+        setUsername(tempUsername)
+        setIsUsernameChecked(true)
         alert("사용가능한 아이디 입니다.")
       }
-    } catch (error){
+    } catch (error) {
+      setUsername("")
+      setIsUsernameChecked(false)
+      throw error;
+    }
+  };
+
+  const handleCheckNickname = async (e) => {
+    try {
+      const response = await checkNickname({nickname: tempNickname});
+      if (response.data === true) {
+        setNickname(tempNickname)
+        setIsNicknameChecked(true)
+        alert("사용가능한 아이디 입니다.")
+      }
+    } catch (error) {
+      setNickname("")
+      setIsNicknameChecked(false)
       throw error;
     }
   };
 
   return (
-      <div className="max-w-md mx-auto my-10 p-6 border border-gray-300 rounded-lg max-h-screen overflow-y-auto">
+      <div
+          className="max-w-md mx-auto my-10 p-6 border border-gray-300 rounded-lg max-h-screen overflow-y-auto">
         <h2 className="text-2xl font-bold mb-4">회원가입</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -47,8 +84,11 @@ const SignupComponent = () => {
                 id="username"
                 type="text"
                 placeholder="아이디를 입력해주세요"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={tempUsername}
+                onChange={(e) => {
+                  setTempUsername(e.target.value);
+                  setIsUsernameChecked(false)
+                }}
                 className="w-full p-2 border border-gray-300 rounded"
             />
             <button
@@ -67,10 +107,20 @@ const SignupComponent = () => {
                 id="nickname"
                 type="text"
                 placeholder="닉네임을 입력해주세요"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
+                value={tempNickname}
+                onChange={(e) => {
+                  setTempNickname(e.target.value);
+                  setIsNicknameChecked(false)
+                }}
                 className="w-full p-2 border border-gray-300 rounded"
             />
+            <button
+                type="button"
+                onClick={handleCheckNickname}
+                className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              중복 확인
+            </button>
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block font-bold mb-2">
@@ -82,6 +132,19 @@ const SignupComponent = () => {
                 placeholder="비밀번호를 입력해주세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="block font-bold mb-2">
+              비밀번호확인*
+            </label>
+            <input
+                id="checkPassword"
+                type="checkPassword"
+                placeholder="비밀번호를 재입력해주세요"
+                value={checkPassword}
+                onChange={(e) => setCheckPassword(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded"
             />
           </div>

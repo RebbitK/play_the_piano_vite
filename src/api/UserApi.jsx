@@ -15,7 +15,7 @@ export const signup = async (signupParam) => {
     nickname: signupParam.nickname,
     password: signupParam.password,
     checkPassword: signupParam.checkPassword,
-    phoneNumber: signupParam.phoneNumber,
+    email: signupParam.email,
     consent: signupParam.consent
   };
 
@@ -23,6 +23,7 @@ export const signup = async (signupParam) => {
     const res = await axios.post(`${host}/signup`, body, header);
     return res.data;
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -66,7 +67,11 @@ export const checkNickname = async (data) =>{
   try {
     const res = await axios.post(`${host}/check-nickname`, body);
     return res.data
-  } catch (error){
-    throw error;
+  } catch (error) {
+    await withReactContent(sweet).fire({
+      title: 'Play the piano',
+      text: error.response?.data?.msg || '알 수 없는 에러가 발생했습니다.',
+      confirmButtonText: '확인'
+    })
   }
 }
