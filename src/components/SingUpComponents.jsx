@@ -1,6 +1,12 @@
 import React, {useState} from 'react';
-import {checkNickname, checkUsername, signup} from '../api/UserApi.jsx';
+import {
+  checkEmail,
+  checkNickname,
+  checkUsername,
+  signup, verificationEmail
+} from '../api/UserApi.jsx';
 import {useNavigate} from 'react-router-dom';
+import Swal from "sweetalert2";
 
 const SignupComponent = () => {
   const [username, setUsername] = useState('');
@@ -10,34 +16,77 @@ const SignupComponent = () => {
   const [tempNickname, setTempNickname] = useState("");
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
   const [password, setPassword] = useState('');
-  const [checkPassword, setCheckPassword] = useState('')
+  const [checkPassword, setCheckPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [tempEmail, setTempEmail] = useState("");
+  const [isEmailChecked, setIsEmailChecked] = useState(false);
   const [consent, setConsent] = useState(false);
   const navigate = useNavigate();
+  const [isRequesting, setIsRequesting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (!isUsernameChecked) {
-        alert("아이디 중복 확인을 먼저 해주세요.");
+        await Swal.fire({
+          title: '아이디 중복 확인',
+          text: '아이디 중복 확인을 먼저 해주세요.',
+          icon: 'warning',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6',
+          background: '#f4f4f9',
+        });
         return;
       }
+
       if (!isNicknameChecked) {
-        alert("닉네임 중복 확인을 먼저 해주세요.");
+        await Swal.fire({
+          title: '닉네임 중복 확인',
+          text: '닉네임 중복 확인을 먼저 해주세요.',
+          icon: 'warning',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6',
+          background: '#f4f4f9',
+        });
+        return;
+      }
+
+      if (!isEmailChecked) {
+        await Swal.fire({
+          title: '이메일 인증 확인',
+          text: '이메일 인증을 확인해 주세요.',
+          icon: 'warning',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6',
+          background: '#f4f4f9',
+        });
         return;
       }
       const response = await signup({
-        username: tempUsername,
+        username,
         password,
         checkPassword,
-        email: "test",
-        nickname: tempNickname,
+        email,
+        nickname,
         consent
       });
-      alert("회원가입 성공")
+      await Swal.fire({
+        title: '회원가입 성공!',
+        text: '회원가입이 완료되었습니다.',
+        icon: 'success',
+        confirmButtonText: '로그인 페이지로 이동',
+        confirmButtonColor: '#3085d6',
+      });
       navigate('/auth/login');
 
     } catch (error) {
+      await Swal.fire({
+        title: '오류 발생',
+        text: '회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.',
+        icon: 'error',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#d33',
+      });
     }
   };
 
@@ -47,7 +96,13 @@ const SignupComponent = () => {
       if (response.data === true) {
         setUsername(tempUsername)
         setIsUsernameChecked(true)
-        alert("사용가능한 아이디 입니다.")
+        await Swal.fire({
+          title: '사용 가능한 아이디',
+          text: '사용 가능한 아이디입니다.',
+          icon: 'success',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6',
+        });
       }
     } catch (error) {
       setUsername("")
@@ -62,7 +117,13 @@ const SignupComponent = () => {
       if (response.data === true) {
         setNickname(tempNickname)
         setIsNicknameChecked(true)
-        alert("사용가능한 아이디 입니다.")
+        await Swal.fire({
+          title: '사용 가능한 닉네임',
+          text: '사용 가능한 닉네임입니다.',
+          icon: 'success',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6',
+        });
       }
     } catch (error) {
       setNickname("")
@@ -70,6 +131,67 @@ const SignupComponent = () => {
       throw error;
     }
   };
+
+  const handleCheckEmail = async (e) => {
+    if (isRequesting) {
+      await Swal.fire('잠시만 기다려주세요', '인증 요청이 진행 중입니다.', 'info');
+      return;
+    }
+
+    try {
+      setIsRequesting(true);
+
+      const response = await checkEmail({ email: tempEmail });
+      if (response.data === true) {
+        let codeValid = false;
+        while (!codeValid) {
+          const result = await Swal.fire({
+            title: '인증번호 입력',
+            input: 'text',
+            inputPlaceholder: '인증번호를 입력하세요',
+            showCancelButton: true,
+            confirmButtonText: '확인',
+            cancelButtonText: '취소',
+            inputValidator: (value) => {
+              if (!value) {
+                return '인증번호를 입력해주세요';
+              }
+            },
+          });
+
+          if (result.isDismissed) {
+            await Swal.fire('취소됨', '이메일 인증을 취소하였습니다.', 'info');
+            setIsRequesting(false);
+            return;
+          }
+
+          const code = result.value;
+
+          const verificationResponse = await verificationEmail({ email: tempEmail, code });
+
+          if (verificationResponse.success) {
+            await Swal.fire('인증 성공!', '이메일 인증이 완료되었습니다.', 'success');
+            setEmail(tempEmail);
+            setIsEmailChecked(true);
+            codeValid = true;
+          } else {
+            const errorMessage = verificationResponse.data?.msg || '인증 중 오류가 발생하였습니다.';
+            await Swal.fire('인증 실패!', errorMessage, 'error');
+          }
+        }
+      }
+    } catch (error) {
+      setEmail('');
+      setIsEmailChecked(false);
+      throw error;
+    } finally {
+      setIsRequesting(false);
+    }
+  };
+
+
+
+
 
   return (
       <div
@@ -147,6 +269,29 @@ const SignupComponent = () => {
                 onChange={(e) => setCheckPassword(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded"
             />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="username" className="block font-bold mb-2">
+              이메일*
+            </label>
+            <input
+                id="email"
+                type="text"
+                placeholder="이메일를 입력해주세요"
+                value={tempEmail}
+                onChange={(e) => {
+                  setTempEmail(e.target.value);
+                  setIsEmailChecked(false)
+                }}
+                className="w-full p-2 border border-gray-300 rounded"
+            />
+            <button
+                type="button"
+                onClick={handleCheckEmail}
+                className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              이메일 인증
+            </button>
           </div>
           <div className="mb-4">
             <label className="block font-bold mb-2">(선택)이벤트성 문자 발송 수신 동의</label>

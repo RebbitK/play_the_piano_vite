@@ -18,29 +18,35 @@ export const signup = async (signupParam) => {
     email: signupParam.email,
     consent: signupParam.consent
   };
-
   try {
     const res = await axios.post(`${host}/signup`, body, header);
     return res.data;
   } catch (error) {
     console.log(error)
-    throw error;
+    await withReactContent(sweet).fire({
+      title: 'Play the piano',
+      text: error.response?.data?.msg || '알 수 없는 에러가 발생했습니다.',
+      confirmButtonText: '확인'
+    })
   }
-};
+}
 
 export const loginPost = async (data) => {
   const body = {
     username: data.username,
     password: data.password
   };
-
   try {
     const res = await axios.post(`${host}/login`, body);
     const token = res.headers['authorization'].split("Bearer ")[1];
     setCookie("accessToken", token);
     return res.data
   } catch (error) {
-    throw error;
+    await withReactContent(sweet).fire({
+      title: 'Play the piano',
+      text: error.response?.data?.msg || '알 수 없는 에러가 발생했습니다.',
+      confirmButtonText: '확인'
+    })
   }
 }
 
@@ -60,7 +66,7 @@ export const checkUsername = async (data) => {
   }
 }
 
-export const checkNickname = async (data) =>{
+export const checkNickname = async (data) => {
   const body = {
     nickname: data.nickname
   };
@@ -73,5 +79,37 @@ export const checkNickname = async (data) =>{
       text: error.response?.data?.msg || '알 수 없는 에러가 발생했습니다.',
       confirmButtonText: '확인'
     })
+  }
+}
+
+export const checkEmail = async (data) => {
+  const body = {
+    email: data.email
+  };
+  try {
+    const res = await axios.post(`${host}/signup/send-email`, body);
+    return res.data
+  } catch (error) {
+    await withReactContent(sweet).fire({
+      title: 'Play the piano',
+      text: error.response?.data?.msg || '알 수 없는 에러가 발생했습니다.',
+      confirmButtonText: '확인'
+    })
+  }
+}
+
+export const verificationEmail = async (data) => {
+  const body = {
+    email: data.email,
+    code: data.code
+  };
+  try {
+    const res = await axios.post(`${host}/check-email-verification`, body);
+    return {success: true, data: res.data};
+  } catch (error) {
+    return {
+      success: false,
+      data: error.response?.data || null,
+    };
   }
 }
