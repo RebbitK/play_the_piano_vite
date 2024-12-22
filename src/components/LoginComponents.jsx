@@ -1,29 +1,23 @@
-import { useState } from "react";
+import {useState} from "react";
 import useCustomLogin from "../hooks/LoginHook.jsx";
-import { useNavigate, Link } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
-const initState = { username: '', pw: '' };
+const initState = {username: '', pw: ''};
 
 const LoginComponent = () => {
-  const [loginParam, setLoginParam] = useState({ ...initState });
-  const { doLogin, moveToPath } = useCustomLogin();
+  const [loginParam, setLoginParam] = useState({...initState});
+  const {doLogin, moveToPath} = useCustomLogin();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     loginParam[e.target.name] = e.target.value;
-    setLoginParam({ ...loginParam });
+    setLoginParam({...loginParam});
   };
 
   const handleClickLogin = (e) => {
     doLogin(loginParam)
     .then(data => {
-      console.log(data);
-      if (data.error) {
-        alert("아이디와 패스워드를 다시 확인하세요");
-      } else {
-        alert("로그인 성공");
-        moveToPath('/');
-      }
+      moveToPath('/');
     });
   };
 
@@ -32,10 +26,10 @@ const LoginComponent = () => {
   };
 
   return (
-      <div className="max-w-xl mx-auto my-10 p-6 border border-gray-300 rounded-lg">
+      <div
+          className="max-w-xl mx-auto my-10 p-6 border border-gray-300 rounded-lg">
         <h2 className="text-2xl font-bold mb-6 text-center">로그인</h2>
         <div className="mb-4 px-6">
-          <div>                                                                                                                                            </div>
           <input
               className="w-full p-2 border border-gray-300 rounded"
               name="username"

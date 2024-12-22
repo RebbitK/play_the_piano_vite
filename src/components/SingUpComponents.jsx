@@ -157,7 +157,7 @@ const SignupComponent = () => {
                 return '인증번호를 입력해주세요';
               }
             },
-          });
+          })
 
           if (result.isDismissed) {
             await Swal.fire('취소됨', '이메일 인증을 취소하였습니다.', 'info');
@@ -174,9 +174,6 @@ const SignupComponent = () => {
             setEmail(tempEmail);
             setIsEmailChecked(true);
             codeValid = true;
-          } else {
-            const errorMessage = verificationResponse.data?.msg || '인증 중 오류가 발생하였습니다.';
-            await Swal.fire('인증 실패!', errorMessage, 'error');
           }
         }
       }
