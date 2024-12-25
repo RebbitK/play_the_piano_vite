@@ -1,5 +1,5 @@
 import axios from "axios";
-import {setCookie} from "../util/CookieUtil.jsx";
+import {getCookie, setCookie} from "../util/CookieUtil.jsx";
 import sweet from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content'
 
@@ -38,7 +38,7 @@ export const loginPost = async (data) => {
   try {
     const res = await axios.post(`${host}/login`, body);
     const token = res.headers['authorization'].split("Bearer ")[1];
-    setCookie("accessToken", token);
+    setCookie("accessToken", token,60*60);
     return res.data
   } catch (error) {
     await withReactContent(sweet).fire({
