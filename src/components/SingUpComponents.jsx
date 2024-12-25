@@ -8,60 +8,60 @@ import {
 } from '../api/UserApi.jsx';
 import {useNavigate} from 'react-router-dom';
 import Swal from "sweetalert2";
+import showSwal from "../util/ShowSwalUtil.jsx"
+import {useInputValidationHook} from "../hooks/useInputValidationHook.jsx";
 
 const SignupComponent = () => {
-  const [username, setUsername] = useState('');
-  const [tempUsername, setTempUsername] = useState("");
-  const [isUsernameChecked, setIsUsernameChecked] = useState(false);
-  const [nickname, setNickname] = useState('');
-  const [tempNickname, setTempNickname] = useState("");
-  const [isNicknameChecked, setIsNicknameChecked] = useState(false);
-  const [password, setPassword] = useState('');
-  const [checkPassword, setCheckPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [tempEmail, setTempEmail] = useState("");
-  const [isEmailChecked, setIsEmailChecked] = useState(false);
-  const [consent, setConsent] = useState(false);
-  const navigate = useNavigate();
+  const [isUsernameChecked, setIsUsernameChecked] = useState(false)
+  const [isNicknameChecked, setIsNicknameChecked] = useState(false)
+  const [checkPassword, setCheckPassword] = useState('')
+  const [isEmailChecked, setIsEmailChecked] = useState(false)
+  const [consent, setConsent] = useState(false)
+  const navigate = useNavigate()
+  const usernameValidation = (value) => /^[a-z0-9]{4,20}$/.test(value)
+  const {value: username, setValue: setUsername, validate: validateUsername} =
+      useInputValidationHook(usernameValidation,
+          '아이디는 영문 소문자와 숫자 4~12자리로 설정해 주세요.')
+
+  const nicknameValidation = (value) => /^[가-힣a-zA-Z0-9]{2,10}$/.test(value)
+  const {value: nickname, setValue: setNickname, validate: validateNickname} =
+      useInputValidationHook(nicknameValidation,
+          '닉네임은 특수문자를 포함하지 않은 2~10글자로 설정해 주세요.')
+
+  const emailValidation = (value) => /^(?!.*\.\.)[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+      value)
+  const {value: email, setValue: setEmail, validate: validateEmail} =
+      useInputValidationHook(emailValidation, '올바른 이메일 형식을 입력해주세요.')
+
+  const passwordValidation = (value) => /(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{8,20}/.test(
+      value)
+  const {value: password, setValue: setPassword, validate: validatePassword} =
+      useInputValidationHook(passwordValidation,
+          '비밀번호는 영어와 숫자가 각각 1개 이상 포함되어있는 8자 ~ 20자로 입력해주세요.')
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (!isUsernameChecked) {
-        await Swal.fire({
-          title: '아이디 중복 확인',
-          text: '아이디 중복 확인을 먼저 해주세요.',
-          icon: 'warning',
-          confirmButtonText: '확인',
-          confirmButtonColor: '#3085d6',
-          background: '#f4f4f9',
-        });
-        return;
+        await showSwal('아이디 중복 확인', '아이디 중복 확인을 먼저 해주세요.', 'warning')
+        return
       }
 
       if (!isNicknameChecked) {
-        await Swal.fire({
-          title: '닉네임 중복 확인',
-          text: '닉네임 중복 확인을 먼저 해주세요.',
-          icon: 'warning',
-          confirmButtonText: '확인',
-          confirmButtonColor: '#3085d6',
-          background: '#f4f4f9',
-        });
-        return;
+        await showSwal('닉네임 중복 확인', '닉네임 중복 확인을 먼저 해주세요.', 'warning')
+        return
       }
 
       if (!isEmailChecked) {
-        await Swal.fire({
-          title: '이메일 인증 확인',
-          text: '이메일 인증을 확인해 주세요.',
-          icon: 'warning',
-          confirmButtonText: '확인',
-          confirmButtonColor: '#3085d6',
-          background: '#f4f4f9',
-        });
-        return;
+        await showSwal('이메일 인증 확인', '이메일 인증을 확인해 주세요.', 'warning')
+        return
       }
+      await validatePassword()
+      if (password !== checkPassword) {
+        await showSwal('비밀번호 불일치', '두 비밀번호가 일치하지 않습니다.', 'error')
+        return
+      }
+
       const response = await signup({
         username,
         password,
@@ -69,117 +69,89 @@ const SignupComponent = () => {
         email,
         nickname,
         consent
-      });
-      await Swal.fire({
-        title: '회원가입 성공!',
-        text: '회원가입이 완료되었습니다.',
-        icon: 'success',
-        confirmButtonText: '로그인 페이지로 이동',
-        confirmButtonColor: '#3085d6',
-      });
-      navigate('/auth/login');
-
+      })
+      await showSwal('회원가입 성공!', '회원가입이 완료되었습니다.', 'success')
+      navigate('/auth/login')
     } catch (error) {
-      await Swal.fire({
-        title: '오류 발생',
-        text: '회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.',
-        icon: 'error',
-        confirmButtonText: '확인',
-        confirmButtonColor: '#d33',
-      });
+      await showSwal('오류 발생', '회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error')
     }
-  };
+  }
 
   const handleCheckUsername = async (e) => {
     try {
-      const response = await checkUsername({username: tempUsername});
+      await validateUsername()
+      const response = await checkUsername({username})
       if (response.data === true) {
-        setUsername(tempUsername)
         setIsUsernameChecked(true)
-        await Swal.fire({
-          title: '사용 가능한 아이디',
-          text: '사용 가능한 아이디입니다.',
-          icon: 'success',
-          confirmButtonText: '확인',
-          confirmButtonColor: '#3085d6',
-        });
+        await showSwal('사용 가능한 아이디', '사용 가능한 아이디입니다.', 'success')
       }
     } catch (error) {
       setUsername("")
       setIsUsernameChecked(false)
-      throw error;
+      throw error
     }
-  };
+  }
 
   const handleCheckNickname = async (e) => {
     try {
-      const response = await checkNickname({nickname: tempNickname});
+      await validateNickname()
+      const response = await checkNickname({nickname})
       if (response.data === true) {
-        setNickname(tempNickname)
         setIsNicknameChecked(true)
-        await Swal.fire({
-          title: '사용 가능한 닉네임',
-          text: '사용 가능한 닉네임입니다.',
-          icon: 'success',
-          confirmButtonText: '확인',
-          confirmButtonColor: '#3085d6',
-        });
+        await showSwal('사용 가능한 닉네임', '사용 가능한 닉네임입니다.', 'success')
       }
     } catch (error) {
       setNickname("")
       setIsNicknameChecked(false)
-      throw error;
+      throw error
     }
-  };
+  }
 
   const handleCheckEmail = async (e) => {
 
     try {
-      const emailRegex = /^(?!.*\.\.)[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-      if (!emailRegex.test(tempEmail)) {
-        await Swal.fire('유효하지 않은 이메일', '올바른 이메일 형식을 입력해주세요.', 'error')
-        return
-      }
-      const response = checkEmail({email: tempEmail});
-      let codeValid = false;
+      await validateEmail()
+      const response = checkEmail({email})
+      let codeValid = false
       while (!codeValid) {
-        const result = await Swal.fire({
-          title: '인증번호 입력',
-          input: 'text',
-          inputPlaceholder: '인증번호를 입력하세요',
-          showCancelButton: true,
-          confirmButtonText: '확인',
-          cancelButtonText: '취소',
-          inputValidator: (value) => {
-            if (!value) {
-              return '인증번호를 입력해주세요';
-            }
-          },
-        })
+        try {
+          const result = await Swal.fire({
+            title: '인증번호 입력',
+            input: 'text',
+            inputPlaceholder: '인증번호를 입력하세요',
+            showCancelButton: true,
+            confirmButtonText: '확인',
+            cancelButtonText: '취소',
+            inputValidator: (value) => {
+              if (!value) {
+                return '인증번호를 입력해주세요';
+              }
+            },
+          })
 
-        if (result.isDismissed) {
-          return;
-        }
+          if (result.isDismissed) {
+            return
+          }
 
-        const code = result.value;
+          const code = result.value;
 
-        const verificationResponse = await verificationEmail(
-            {email: tempEmail, code});
+          const verificationResponse = await verificationEmail(
+              {email, code})
 
-        if (verificationResponse.success) {
-          await Swal.fire('인증 성공!', '이메일 인증이 완료되었습니다.', 'success');
-          setEmail(tempEmail);
-          setIsEmailChecked(true);
-          codeValid = true;
+          if (verificationResponse.success) {
+            await showSwal('인증 성공!', '이메일 인증이 완료되었습니다.', 'success')
+            setIsEmailChecked(true)
+            codeValid = true
+          }
+        } catch (error) {
         }
       }
-
     } catch (error) {
-      setEmail('');
-      setIsEmailChecked(false);
-      throw error;
+      setEmail('')
+      setIsEmailChecked(false)
+      throw error
     }
-  };
+  }
 
   return (
       <div
@@ -194,9 +166,9 @@ const SignupComponent = () => {
                 id="username"
                 type="text"
                 placeholder="아이디를 입력해주세요"
-                value={tempUsername}
+                value={username}
                 onChange={(e) => {
-                  setTempUsername(e.target.value);
+                  setUsername(e.target.value);
                   setIsUsernameChecked(false)
                 }}
                 className="w-full p-2 border border-gray-300 rounded"
@@ -217,9 +189,9 @@ const SignupComponent = () => {
                 id="nickname"
                 type="text"
                 placeholder="닉네임을 입력해주세요"
-                value={tempNickname}
+                value={nickname}
                 onChange={(e) => {
-                  setTempNickname(e.target.value);
+                  setNickname(e.target.value);
                   setIsNicknameChecked(false)
                 }}
                 className="w-full p-2 border border-gray-300 rounded"
@@ -266,9 +238,9 @@ const SignupComponent = () => {
                 id="email"
                 type="text"
                 placeholder="이메일를 입력해주세요"
-                value={tempEmail}
+                value={email}
                 onChange={(e) => {
-                  setTempEmail(e.target.value);
+                  setEmail(e.target.value);
                   setIsEmailChecked(false)
                 }}
                 className="w-full p-2 border border-gray-300 rounded"
@@ -309,7 +281,7 @@ const SignupComponent = () => {
           </button>
         </form>
       </div>
-  );
-};
+  )
+}
 
-export default SignupComponent;
+export default SignupComponent

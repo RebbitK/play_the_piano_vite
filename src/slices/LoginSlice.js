@@ -12,7 +12,7 @@ export const loginPostAsync = createAsyncThunk('loginPostAsync', (param) => {
 
 })
 
-const loadMemberCookie = () => {  //쿠키에서 로그인 정보 로딩 
+const loadMemberCookie = () => {
 
   const memberInfo =  getCookie("accessToken");
   
@@ -26,35 +26,27 @@ const loadMemberCookie = () => {  //쿠키에서 로그인 정보 로딩
 
 const loginSlice = createSlice({
   name: 'LoginSlice',
-  initialState: loadMemberCookie()|| initState, //쿠키가 없다면 초깃값사용 
+  initialState: loadMemberCookie()|| initState,
   reducers: {
     login: (state, action) => {
-      console.log("login.....")
       
       const data = action.payload
 
-      //새로운 상태 
       return {username: data.username}
 
     },
     logout: (state, action) => {
-      console.log("logout....")
-
-      removeCookie("member")
+      removeCookie("accessToken")
       return {...initState}
     }
   },
   extraReducers: (builder) => {
 
     builder.addCase( loginPostAsync.fulfilled, (state, action) => {
-      console.log("fulfilled")
-
       const payload = action.payload
 
-
-      //정상적인 로그인시에만 저장 
       if(!payload.error){
-        setCookie("accessToken",JSON.stringify(payload), 1) //1일
+        setCookie("accessToken",JSON.stringify(payload), 1)
       }
 
       return payload
@@ -62,10 +54,8 @@ const loginSlice = createSlice({
     })
 
     .addCase(loginPostAsync.pending, (state,action) => {
-      console.log("pending")
     })
     .addCase(loginPostAsync.rejected, (state,action) => {
-      console.log("rejected")
     })
   }
 })

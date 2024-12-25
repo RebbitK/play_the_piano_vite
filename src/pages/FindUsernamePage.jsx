@@ -9,7 +9,7 @@ const FindUsernamePage = () => {
           <FindUsernameComponent/>
         </div>
       </div>
-  );
+  )
 }
 
 export default FindUsernamePage;

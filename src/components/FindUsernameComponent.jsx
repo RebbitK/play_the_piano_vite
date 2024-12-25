@@ -1,52 +1,62 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {findUsernameByEmail, sendFindUsernameEmail} from '../api/UserApi.jsx';
 import Swal from "sweetalert2";
+import {useNavigate} from "react-router-dom";
+import {useInputValidationHook} from "../hooks/useInputValidationHook.jsx";
 
 const FindUsernameComponent = () => {
-  const [email, setEmail] = useState('');
+  const emailValidation = (value) => /^(?!.*\.\.)[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+      value)
+  const {value: email, setValue: setEmail, validate: validateEmail} =
+      useInputValidationHook(emailValidation, '올바른 이메일 형식을 입력해주세요.')
+  const navigate = useNavigate()
 
   const handleCheckEmail = async (e) => {
     e.preventDefault()
-    const emailRegex = /^(?!.*\.\.)[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    if (!emailRegex.test(email)) {
-      await Swal.fire('유효하지 않은 이메일', '올바른 이메일 형식을 입력해주세요.', 'error')
-      return
-    }
-    const response =  sendFindUsernameEmail({
-      email
-    })
-    let codeValid = false;
-    while (!codeValid) {
-      const result = await Swal.fire({
-        title: '인증번호 입력',
-        input: 'text',
-        inputPlaceholder: '인증번호를 입력하세요.',
-        showCancelButton: true,
-        confirmButtonText: '확인',
-        cancelButtonText: '취소',
-        inputValidator: (value) => {
-          if (!value) {
-            return '인증번호를 입력해주세요';
-          }
-        },
+    try {
+      await validateEmail()
+      const response = await sendFindUsernameEmail({
+        email
       })
+      let codeValid = false;
+      while (!codeValid) {
+        try {
+          const result = await Swal.fire({
+            title: '인증번호 입력',
+            input: 'text',
+            inputPlaceholder: '인증번호를 입력하세요.',
+            showCancelButton: true,
+            confirmButtonText: '확인',
+            cancelButtonText: '취소',
+            inputValidator: (value) => {
+              if (!value) {
+                return '인증번호를 입력해주세요';
+              }
+            },
+          })
 
-      if (result.isDismissed) {
-        return
-      }
+          if (result.isDismissed) {
+            return
+          }
 
-      const code = result.value;
+          const code = result.value;
 
-      const verificationResponse = await findUsernameByEmail({email, code});
-      if (verificationResponse.data) {
-        await Swal.fire('인증 성공!',
-            `이메일 인증이 완료되었습니다.<br>
+          const verificationResponse = await findUsernameByEmail({email, code});
+          if (verificationResponse.success) {
+            await Swal.fire('인증 성공!',
+                `이메일 인증이 완료되었습니다.<br>
     <div style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; color: #333;">
       ${verificationResponse.data}
     </div>
   `, 'success')
-        codeValid = true
+            codeValid = true
+            navigate('/auth/login')
+          }
+        } catch (error) {
+        }
       }
+    } catch (error) {
+      throw error
     }
 
   }

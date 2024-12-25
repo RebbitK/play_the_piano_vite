@@ -22,7 +22,6 @@ export const signup = async (signupParam) => {
     const res = await axios.post(`${host}/signup`, body, header);
     return res.data;
   } catch (error) {
-    console.log(error)
     await withReactContent(sweet).fire({
       title: 'Play the piano',
       text: error.response?.data?.msg || '알 수 없는 에러가 발생했습니다.',
@@ -105,7 +104,7 @@ export const verificationEmail = async (data) => {
   }
   try {
     const res = await axios.post(`${host}/check-email-verification`, body);
-    return {success: true, data: res.data};
+    return {success: true, data: res.data}
   } catch (error) {
     await withReactContent(sweet).fire({
       title: 'Play the piano',
@@ -138,7 +137,7 @@ export const findUsernameByEmail = async (data) => {
   }
   try {
     const res = await axios.post(`${host}/find-username`, body);
-    return res.data
+    return {success: true, data: res.data}
   } catch (error) {
     await withReactContent(sweet).fire({
       title: 'Play the piano',
@@ -171,7 +170,7 @@ export const findPasswordByEmail = async (data) => {
   }
   try {
     const res = await axios.post(`${host}/find-password`, body);
-    return res.data
+    return {success: true, data: res.data}
   } catch (error) {
     await withReactContent(sweet).fire({
       title: 'Play the piano',
@@ -188,7 +187,7 @@ export const updatePassword = async (data) => {
     checkPassword: data.checkPassword
   }
   try {
-    const res = await axios.post(`${host}/update-password`, body);
+    const res = await axios.patch(`${host}/update-password`, body);
     return res.data
   } catch (error) {
     await withReactContent(sweet).fire({

@@ -17,12 +17,12 @@ const LoginComponent = () => {
   const handleClickLogin = (e) => {
     doLogin(loginParam)
     .then(data => {
-      moveToPath('/');
+      moveToPath('/')
     });
   };
 
   const handleClickSignUp = () => {
-    navigate('/auth/signup');
+    navigate('/auth/signup')
   };
 
   return (
@@ -50,11 +50,11 @@ const LoginComponent = () => {
           />
         </div>
         <div className="text-left px-6 mb-4">
-          <a href="/sign/username" className="text-purple-600 hover:underline">
+          <a href="/auth/username" className="text-purple-600 hover:underline">
             아이디 찾기
           </a>
           <span className="mx-2 text-gray-500">/</span>
-          <a href="/sign/password" className="text-purple-600 hover:underline">
+          <a href="/auth/password" className="text-purple-600 hover:underline">
             비밀번호 찾기
           </a>
         </div>
@@ -69,7 +69,7 @@ const LoginComponent = () => {
         </div>
         <div className="flex px-6 justify-between items-center mb-4">
           <button
-              className="w-full py-2 bg-gray-200 text-gray-700 rounded hover:bg-purple-700"
+              className="w-full py-2 bg-gray-200 text-gray-700 rounded "
               onClick={handleClickSignUp}
           >
             회원가입
