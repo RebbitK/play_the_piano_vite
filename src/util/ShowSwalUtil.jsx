@@ -10,4 +10,4 @@ export const showSwalUtil = async (title, text, icon = 'info') => {
   })
 }
 
-export default showSwalUtil;
+export default showSwalUtil
