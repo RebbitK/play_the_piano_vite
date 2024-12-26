@@ -4,7 +4,8 @@ import { loginPost } from "../api/UserApi.jsx";
 import { getCookie, setCookie, removeCookie } from "../util/CookieUtil.jsx";
 
 const initState = {
-  username:''
+  username:'',
+  password: ''
 }
 
 export const loginPostAsync = createAsyncThunk('loginPostAsync', (param) => {
@@ -32,7 +33,7 @@ const loginSlice = createSlice({
       
       const data = action.payload
 
-      return {username: data.username}
+      return { username: data.username, password: data.password }
 
     },
     logout: (state, action) => {
@@ -49,7 +50,7 @@ const loginSlice = createSlice({
         setCookie("accessToken",JSON.stringify(payload), 1)
       }
 
-      return payload
+      return { username: payload.username, password: payload.password }
 
     })
 

@@ -2,7 +2,7 @@ import {useState} from "react";
 import useCustomLogin from "../hooks/LoginHook.jsx";
 import {useNavigate} from "react-router-dom";
 
-const initState = {username: '', pw: ''};
+const initState = {username: '', password: ''};
 
 const LoginComponent = () => {
   const [loginParam, setLoginParam] = useState({...initState});
@@ -42,9 +42,9 @@ const LoginComponent = () => {
         <div className="mb-2 px-6">
           <input
               className="w-full p-2 border border-gray-300 rounded"
-              name="pw"
+              name="password"
               type="password"
-              value={loginParam.pw}
+              value={loginParam.password}
               onChange={handleChange}
               placeholder="비밀번호를 입력해주세요"
           />
