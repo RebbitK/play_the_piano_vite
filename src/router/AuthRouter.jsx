@@ -6,6 +6,7 @@ const Signup = lazy(()=>import ("../pages/SignupPage.jsx"))
 const Username = lazy(() =>import ("../pages/FindUsernamePage.jsx"))
 const Password = lazy(() =>import("../pages/FindPasswordPage.jsx"))
 const UpdatePassword = lazy(() =>import ("../pages/UpdatePasswordPage.jsx"))
+const Testd = lazy(() =>import("../pages/DirectionsPage.jsx"))
 
 
 const authRouter = () => {
@@ -45,8 +46,15 @@ const authRouter = () => {
             <UpdatePassword />
           </Suspense>
       )
+    },{
+    path: "test",
+      element: (
+          <Suspense fallback={Loading}>
+            <Testd />
+          </Suspense>
+      )
     }
-  ];
-};
+  ]
+}
 
 export default authRouter;
